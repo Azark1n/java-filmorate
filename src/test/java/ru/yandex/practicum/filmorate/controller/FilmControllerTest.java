@@ -38,10 +38,10 @@ class FilmControllerTest {
     }
 
     @Test
-    void testAddAndUpdate() throws Exception {
+    void handleAdd_PayloadIsValid_ReturnsValidResponseEntity() throws Exception {
         Film newFilm = Film.builder()
-                .name("new film")
-                .description("description of new film")
+                .name("film")
+                .description("description of film")
                 .releaseDate(LocalDate.of(1999, 1, 1))
                 .duration(100).build();
 
@@ -51,33 +51,52 @@ class FilmControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
-                .andExpect(jsonPath("$.name", Matchers.equalTo("new film")));
+                .andExpect(jsonPath("$.name", Matchers.equalTo("film")));
+    }
 
-        Film newFilm2 = newFilm.toBuilder().id(1).duration(200).build();
+    @Test
+    void handleUpdate_PayloadIsValid_ReturnsValidResponseEntity() throws Exception {
+        handleAdd_PayloadIsValid_ReturnsValidResponseEntity();
+
+        Film newFilm = Film.builder()
+                .id(1)
+                .name("new film")
+                .description("description of new film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(200).build();
 
         mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newFilm2)))
+                        .content(mapper.writeValueAsString(newFilm)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("new film")))
+                .andExpect(jsonPath("$.description", Matchers.equalTo("description of new film")))
                 .andExpect(jsonPath("$.duration", Matchers.equalTo(200)));
+    }
 
-        Film newFilm3 = newFilm.toBuilder().id(999).duration(200).build();
+    @Test
+    void handleUpdate_IdIsInvalid_ReturnsViolationResponseEntity() throws Exception {
+        Film newFilm = Film.builder()
+                .id(999)
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
 
         mockMvc.perform(put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newFilm3)))
+                        .content(mapper.writeValueAsString(newFilm)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("id")));
     }
 
     @Test
-    void testName() throws Exception {
+    void handleAdd_NameIsNull_ReturnsViolationResponseEntity() throws Exception {
         Film newFilm = Film.builder()
-                .description("description of new film")
+                .description("description of film")
                 .releaseDate(LocalDate.of(1999, 1, 1))
                 .duration(100).build();
 
@@ -87,30 +106,44 @@ class FilmControllerTest {
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("name")));
+    }
 
-        Film newFilm2 = newFilm.toBuilder().name("").build();
-
-        mockMvc.perform(post("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newFilm2)))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("name")));
-
-        Film newFilm3 = newFilm.toBuilder().name(" ").build();
+    @Test
+    void handleAdd_NameIsEmpty_ReturnsViolationResponseEntity() throws Exception {
+        Film newFilm = Film.builder()
+                .name("")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newFilm3)))
+                        .content(mapper.writeValueAsString(newFilm)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("name")));
     }
 
     @Test
-    void testDescription() throws Exception {
+    void handleAdd_NameIsBlank_ReturnsViolationResponseEntity() throws Exception {
         Film newFilm = Film.builder()
-                .name("new film")
+                .name(" ")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+
+        mockMvc.perform(post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newFilm)))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("name")));
+    }
+
+    @Test
+    void handleAdd_DescriptionIsValid_ReturnsValidResponseEntity() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
                 .description(RandomString.make(200))
                 .releaseDate(LocalDate.of(1999, 1, 1))
                 .duration(100).build();
@@ -121,20 +154,27 @@ class FilmControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
-                .andExpect(jsonPath("$.name", Matchers.equalTo("new film")));
+                .andExpect(jsonPath("$.name", Matchers.equalTo("film")));
+    }
 
-        Film newFilm2 = newFilm.toBuilder().description(RandomString.make(201)).build();
+    @Test
+    void handleAdd_DescriptionIsInvalid_ReturnsViolationResponseEntity() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description(RandomString.make(201))
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newFilm2)))
+                        .content(mapper.writeValueAsString(newFilm)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("description")));
     }
 
     @Test
-    void testReleaseDate() throws Exception {
+    void handleAdd_ReleaseDateIsValid_ReturnsValidResponseEntity() throws Exception {
         Film newFilm = Film.builder()
                 .name("new film")
                 .description("description of new film")
@@ -148,19 +188,26 @@ class FilmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("new film")));
+    }
 
-        Film newFilm2 = newFilm.toBuilder().releaseDate(LocalDate.of(1895, 12, 27)).build();
+    @Test
+    void handleAdd_ReleaseDateIsInvalid_ReturnsViolationResponseEntity() throws Exception {
+        Film newFilm = Film.builder()
+                .name("new film")
+                .description("description of new film")
+                .releaseDate(LocalDate.of(1895, 12, 27))
+                .duration(100).build();
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newFilm2)))
+                        .content(mapper.writeValueAsString(newFilm)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("releaseDate")));
     }
 
     @Test
-    void testDuration() throws Exception {
+    void handleAdd_DurationIsValid_ReturnsValidResponseEntity() throws Exception {
         Film newFilm = Film.builder()
                 .name("new film")
                 .description("description of new film")
@@ -174,12 +221,19 @@ class FilmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("new film")));
+    }
 
-        Film newFilm2 = newFilm.toBuilder().duration(0).build();
+    @Test
+    void handleAdd_DurationIsInvalid_ReturnsViolationResponseEntity() throws Exception {
+        Film newFilm = Film.builder()
+                .name("new film")
+                .description("description of new film")
+                .releaseDate(LocalDate.of(1900, 1, 1))
+                .duration(0).build();
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newFilm2)))
+                        .content(mapper.writeValueAsString(newFilm)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("duration")));

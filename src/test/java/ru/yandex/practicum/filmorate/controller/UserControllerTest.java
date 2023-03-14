@@ -37,7 +37,7 @@ class UserControllerTest {
     }
 
     @Test
-    void testAddAndUpdate() throws Exception {
+    void handleAdd_PayloadIsValid_ReturnsValidResponseEntity() throws Exception {
         User newUser = User.builder()
                 .name("user")
                 .login("login")
@@ -51,29 +51,47 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("user")));
+    }
 
-        User newUser2 = newUser.toBuilder().id(1).name("newUser").build();
+    @Test
+    void handleUpdate_PayloadIsValid_ReturnsValidResponseEntity() throws Exception {
+        handleAdd_PayloadIsValid_ReturnsValidResponseEntity();
+
+        User newUser = User.builder()
+                .id(1)
+                .name("newUser")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser2)))
+                        .content(mapper.writeValueAsString(newUser)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("newUser")));
+    }
 
-        User newUser3 = newUser.toBuilder().id(999).name("newUser2").build();
+    @Test
+    void handleUpdate_IdIsInvalid_ReturnsViolationResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .id(999)
+                .name("newUser")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser3)))
+                        .content(mapper.writeValueAsString(newUser)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("id")));
     }
 
     @Test
-    void testName() throws Exception {
+    void handleAdd_NameIsNull_ReturnsValidResponseEntity() throws Exception {
         User newUser = User.builder()
                 .login("login")
                 .email("new@user.com")
@@ -86,30 +104,44 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("login")));
+    }
 
-        User newUser2 = newUser.toBuilder().name("").build();
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser2)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", Matchers.equalTo(2)))
-                .andExpect(jsonPath("$.name", Matchers.equalTo("login")));
-
-        User newUser3 = newUser.toBuilder().name(" ").build();
+    @Test
+    void handleAdd_NameIsEmpty_ReturnsValidResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name("")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser3)))
+                        .content(mapper.writeValueAsString(newUser)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", Matchers.equalTo(3)))
+                .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
                 .andExpect(jsonPath("$.name", Matchers.equalTo("login")));
     }
 
     @Test
-    void testLogin() throws Exception {
+    void handleAdd_NameIsBlank_ReturnsValidResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name(" ")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newUser)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
+                .andExpect(jsonPath("$.name", Matchers.equalTo("login")));
+    }
+
+    @Test
+    void handleAdd_LoginIsNull_ReturnsViolationResponseEntity() throws Exception {
         User newUser = User.builder()
                 .name("user")
                 .email("new@user.com")
@@ -121,41 +153,61 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("login")));
-
-        User newUser2 = newUser.toBuilder().id(1).login("").build();
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser2)))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("login")));
-
-        User newUser3 = newUser.toBuilder().id(1).login(" ").build();
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser3)))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("login")));
-
-        User newUser4 = newUser.toBuilder().id(1).login("lo gin").build();
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser4)))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("login")));
-
     }
 
     @Test
-    void testEmail() throws Exception {
+    void handleAdd_LoginIsEmpty_ReturnsViolationResponseEntity() throws Exception {
         User newUser = User.builder()
-                .login("login")
                 .name("user")
+                .login("")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newUser)))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("login")));
+    }
+
+    @Test
+    void handleAdd_LoginIsBlank_ReturnsViolationResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name("user")
+                .login(" ")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newUser)))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("login")));
+    }
+
+    @Test
+    void handleAdd_LoginIsInvalid_ReturnsViolationResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name("user")
+                .login("lo gin")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newUser)))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("login")));
+    }
+
+    @Test
+    void handleAdd_EmailIsNull_ReturnsViolationResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
                 .birthday(LocalDate.of(1999, 1, 1)).build();
 
         mockMvc.perform(post("/users")
@@ -164,37 +216,58 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("email")));
+    }
 
-        User newUser2 = newUser.toBuilder().id(1).email("").build();
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser2)))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("email")));
-
-        User newUser3 = newUser.toBuilder().id(1).email(" ").build();
+    @Test
+    void handleAdd_EmailIsEmpty_ReturnsViolationResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser3)))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("email")));
-
-        User newUser4 = newUser.toBuilder().id(1).email("email").build();
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(newUser4)))
+                        .content(mapper.writeValueAsString(newUser)))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("email")));
     }
 
     @Test
-    void testBirthday() throws Exception {
+    void handleAdd_EmailIsBlank_ReturnsViolationResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email(" ")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newUser)))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("email")));
+    }
+
+    @Test
+    void handleAdd_EmailIsInvalid_ReturnsViolationResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("email.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(newUser)))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("email")));
+    }
+
+    @Test
+    void handleAdd_BirthdayIsNow_ReturnsViolationResponseEntity() throws Exception {
         User newUser = User.builder()
                 .login("login")
                 .name("user")
@@ -207,7 +280,15 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("birthday")));
+    }
 
+    @Test
+    void handleAdd_BirthdayIsYesterday_ReturnsValidResponseEntity() throws Exception {
+        User newUser = User.builder()
+                .login("login")
+                .name("user")
+                .email("new@user.com")
+                .birthday(LocalDate.now()).build();
         User newUser2 = newUser.toBuilder().birthday(LocalDate.now().minusDays(1)).build();
 
         mockMvc.perform(post("/users")
