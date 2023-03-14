@@ -70,7 +70,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(newFilm3)))
                 .andDo(print())
-                .andExpect(status().is5xxServerError())
+                .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("id")));
     }
 

@@ -68,7 +68,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(newUser3)))
                 .andDo(print())
-                .andExpect(status().is5xxServerError())
+                .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("id")));
     }
 
