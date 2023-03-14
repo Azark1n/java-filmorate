@@ -42,7 +42,7 @@ public class ErrorHandlingControllerAdvice {
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public ValidationErrorResponse onValidationException(ValidationException e) {
         return new ValidationErrorResponse(List.of(new Violation(e.getFieldName(), e.getMessage())));
