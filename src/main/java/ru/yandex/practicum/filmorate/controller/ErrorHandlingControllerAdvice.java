@@ -1,19 +1,20 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.validation.ValidationErrorResponse;
-import ru.yandex.practicum.filmorate.validation.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.validation.Violation;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class ErrorHandlingControllerAdvice {
     @ResponseBody
@@ -28,6 +29,7 @@ public class ErrorHandlingControllerAdvice {
                         )
                 )
                 .collect(Collectors.toList());
+        log.warn(violations.toString());
         return new ValidationErrorResponse(violations);
     }
 
@@ -38,13 +40,15 @@ public class ErrorHandlingControllerAdvice {
         final List<Violation> violations = e.getBindingResult().getFieldErrors().stream()
                 .map(error -> new Violation(error.getField(), error.getDefaultMessage()))
                 .collect(Collectors.toList());
+        log.warn(violations.toString());
         return new ValidationErrorResponse(violations);
     }
 
-    @ExceptionHandler(ValidationException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public ValidationErrorResponse onValidationException(ValidationException e) {
-        return new ValidationErrorResponse(List.of(new Violation(e.getFieldName(), e.getMessage())));
+    public ErrorResponse onNotFoundException(NotFoundException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 }

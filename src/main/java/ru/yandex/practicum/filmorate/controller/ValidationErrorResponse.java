@@ -1,7 +1,8 @@
-package ru.yandex.practicum.filmorate.validation;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import ru.yandex.practicum.filmorate.validation.Violation;
 
 import java.util.List;
 

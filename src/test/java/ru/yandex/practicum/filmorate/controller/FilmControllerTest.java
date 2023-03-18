@@ -89,8 +89,7 @@ class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(newFilm)))
                 .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("id")));
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
