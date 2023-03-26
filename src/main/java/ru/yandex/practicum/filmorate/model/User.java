@@ -8,6 +8,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Value
 @Builder(toBuilder = true)
@@ -27,8 +30,10 @@ public class User {
     @Past
     LocalDate birthday;
 
+    Set<Integer> friends;
+
     @Builder
-    public User(int id, String email, String login, String name, LocalDate birthday) {
+    public User(int id, String email, String login, String name, LocalDate birthday, Set<Integer> friends) {
         this.id = id;
         this.email = email;
         this.login = login;
@@ -38,5 +43,6 @@ public class User {
             this.name = name;
         }
         this.birthday = birthday;
+        this.friends = Objects.requireNonNullElseGet(friends, HashSet::new);
     }
 }

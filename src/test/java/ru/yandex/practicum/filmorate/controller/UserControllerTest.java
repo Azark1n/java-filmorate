@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
@@ -29,11 +30,11 @@ class UserControllerTest {
     private ObjectMapper mapper;
 
     @Autowired
-    private UserController userController;
+    private UserStorage userStorage;
 
     @BeforeEach
     void setUp() {
-        userController.clearDB();
+        userStorage.clearDB();
     }
 
     @Test

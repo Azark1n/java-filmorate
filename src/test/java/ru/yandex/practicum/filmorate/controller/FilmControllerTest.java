@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 
@@ -30,11 +31,11 @@ class FilmControllerTest {
     private ObjectMapper mapper;
 
     @Autowired
-    private FilmController filmController;
+    private FilmStorage filmStorage;
 
     @BeforeEach
     void setUp() {
-        filmController.clearDB();
+        filmStorage.clearDB();
     }
 
     @Test

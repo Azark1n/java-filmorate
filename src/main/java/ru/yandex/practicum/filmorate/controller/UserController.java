@@ -2,53 +2,61 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final HashMap<Integer, User> map = new HashMap<>();
-    private AtomicInteger nextId = new AtomicInteger(0);
+    private final UserService service;
 
-    public void clearDB() {
-        map.clear();
-        nextId = new AtomicInteger(0);
+    public UserController(UserService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<User> getAll() {
-        return new ArrayList<>(map.values());
+        return service.getAll();
     }
 
     @PostMapping
     public User add(@Valid @RequestBody User user) {
-        User newUser = user.toBuilder()
-                .id(nextId.incrementAndGet())
-                .build();
-
-        log.info("Adding user: {}", newUser);
-
-        map.put(newUser.getId(), newUser);
-        return map.get(newUser.getId());
+        log.info("Adding user: {}", user);
+        return service.add(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (map.containsKey(user.getId())) {
-            log.info("Updating user: {}", user);
+        log.info("Updating user: {}", user);
+        return service.update(user);
+    }
 
-            map.put(user.getId(), user);
-            return map.get(user.getId());
-        } else {
-            throw new NotFoundException(String.format("User with id=%d not found", user.getId()));
-        }
+    @GetMapping("/{id}")
+    public User getById(@PathVariable int id) {
+        return service.getById(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return service.getCommonFriends(id, otherId);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public boolean addFriend(@PathVariable int id, @PathVariable int friendId) {
+        return service.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public boolean deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        return service.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable int id) {
+        return service.getFriends(id);
     }
 }
