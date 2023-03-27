@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -10,16 +10,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
+@RequiredArgsConstructor
 @Service
 public class FilmService {
     private final FilmStorage storage;
     private final UserStorage userStorage;
-
-    public FilmService(FilmStorage storage, UserStorage userStorage) {
-        this.storage = storage;
-        this.userStorage = userStorage;
-    }
 
     public List<Film> getAll() {
         return storage.getAll();

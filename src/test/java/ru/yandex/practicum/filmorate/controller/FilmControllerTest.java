@@ -11,12 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +33,9 @@ class FilmControllerTest {
 
     @Autowired
     private FilmStorage filmStorage;
+
+    @Autowired
+    private UserStorage userStorage;
 
     @BeforeEach
     void setUp() {
@@ -237,5 +241,169 @@ class FilmControllerTest {
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.violations[0].fieldName", Matchers.equalTo("duration")));
+    }
+
+    @Test
+    void handleGetById_IdIsValid_ReturnsValidResponseEntity() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        mockMvc.perform(get("/films/1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.equalTo(1)))
+                .andExpect(jsonPath("$.name", Matchers.equalTo("film")));
+    }
+
+    @Test
+    void handleGetById_IdIsInvalid_ReturnsNotFoundStatus() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        mockMvc.perform(get("/films/999"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void handlePutLike_IdsAreValid_ReturnsTrue() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+        userStorage.add(newUser);
+
+        mockMvc.perform(put("/films/1/like/1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", Matchers.equalTo(true)));
+    }
+
+    @Test
+    void handlePutLike_IdFilmIsInvalid_ReturnsNotFoundStatus() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+        userStorage.add(newUser);
+
+        mockMvc.perform(put("/films/999/like/1"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void handlePutLike_IdUserIsInvalid_ReturnsNotFoundStatus() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+        userStorage.add(newUser);
+
+        mockMvc.perform(put("/films/1/like/999"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void handleDeleteLike_IdsAreValid_ReturnsTrue() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+        userStorage.add(newUser);
+
+        mockMvc.perform(put("/films/1/like/1"));
+
+        mockMvc.perform(delete("/films/1/like/1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", Matchers.equalTo(true)));
+    }
+
+    @Test
+    void handleDeleteLike_IdFilmIsInvalid_ReturnsNotFoundStatus() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+        userStorage.add(newUser);
+
+        mockMvc.perform(put("/films/1/like/1"));
+
+        mockMvc.perform(put("/films/999/like/1"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void handleDeleteLike_IdUserIsInvalid_ReturnsNotFoundStatus() throws Exception {
+        Film newFilm = Film.builder()
+                .name("film")
+                .description("description of film")
+                .releaseDate(LocalDate.of(1999, 1, 1))
+                .duration(100).build();
+        filmStorage.add(newFilm);
+
+        User newUser = User.builder()
+                .name("user")
+                .login("login")
+                .email("new@user.com")
+                .birthday(LocalDate.of(1999, 1, 1)).build();
+        userStorage.add(newUser);
+
+        mockMvc.perform(put("/films/1/like/1"));
+
+        mockMvc.perform(put("/films/1/like/999"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 }
