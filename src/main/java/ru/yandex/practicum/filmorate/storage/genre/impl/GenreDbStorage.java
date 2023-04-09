@@ -18,6 +18,7 @@ import java.util.List;
 @Component
 public class GenreDbStorage implements GenreStorage {
     JdbcTemplate jdbcTemplate;
+
     @Override
     public Genre getById(int id) {
         try {
