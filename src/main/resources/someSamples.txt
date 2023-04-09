@@ -1,0 +1,15 @@
+IF NOT EXISTS - для создания таблиц, в случае их отсутствия
+
+Создание строк данных, в случае их отсутствия:
+1. https://stackoverflow.com/questions/19768051/h2-sql-database-insert-if-the-record-does-not-exist
+Сразу скажу, что мне помог только вариант с ответом, где галка. Merge into не работает, insert ignore тоже
+2. MERGE INTO genre KEY(genre_id)
+   VALUES (1, 'Комедия'),
+          (2, 'Драма'),
+          (3, 'Мультфильм'),
+          (4, 'Триллер'),
+          (5, 'Документальный'),
+          (6, 'Боевик'); у меня работает
+INSERT INTO products (id, name, price, category)
+VALUES (1, 'Шампунь 2', 1200, 'косметика")
+ON CONFLICT DO NOTHING;

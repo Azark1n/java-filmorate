@@ -50,17 +50,17 @@ CREATE TABLE "mpa" (
   "name" varchar(50)
 );
 
-ALTER TABLE "film" ADD FOREIGN KEY ("mpa") REFERENCES "mpa" ("id");
+ALTER TABLE "film" ADD FOREIGN KEY (mpa_ids) REFERENCES "mpa" ("id");
 
-ALTER TABLE "user_friends" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "user_friends" ADD FOREIGN KEY ("user_id") REFERENCES user1 ("id");
 
-ALTER TABLE "user_friends" ADD FOREIGN KEY ("friend_id") REFERENCES "user" ("id");
+ALTER TABLE "user_friends" ADD FOREIGN KEY ("friend_id") REFERENCES user1 ("id");
 
-ALTER TABLE "user_friendships" ADD FOREIGN KEY ("source_id") REFERENCES "user" ("id");
+ALTER TABLE "user_friendships" ADD FOREIGN KEY ("source_id") REFERENCES user1 ("id");
 
-ALTER TABLE "user_friendships" ADD FOREIGN KEY ("destination_id") REFERENCES "user" ("id");
+ALTER TABLE "user_friendships" ADD FOREIGN KEY ("destination_id") REFERENCES user1 ("id");
 
-ALTER TABLE "film_likes" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "film_likes" ADD FOREIGN KEY ("user_id") REFERENCES user1 ("id");
 
 ALTER TABLE "film_likes" ADD FOREIGN KEY ("film_id") REFERENCES "film" ("id");
 

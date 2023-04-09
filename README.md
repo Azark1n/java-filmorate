@@ -18,7 +18,7 @@
 
 ## Data base diagram
 
-![db_diagram.png](src/main/resources/db_diagram.png)
+![db_diagram.png](src/main/resources/assets/db_diagram.png)
 
 ## Описание таблиц
 
@@ -54,7 +54,6 @@ WHERE
     u.id = 1
 ```
 
-
 ##### Неподтвержденные заявки в друзья пользователя
 
 ```SQL
@@ -71,7 +70,6 @@ WHERE
     AND uf.agree = false
 ```
 
-
 ##### Понравившиеся фильмы пользователя
 
 ```SQL
@@ -86,7 +84,6 @@ WHERE
     u.id = 1
 ```
 
-
 ##### Рейтинг mpa фильма
 
 ```SQL
@@ -100,7 +97,6 @@ LEFT JOIN mpa ON f.mpa = mpa.id
 WHERE
     f.id = 1
 ```
-
 
 ##### Жанры фильма
 
