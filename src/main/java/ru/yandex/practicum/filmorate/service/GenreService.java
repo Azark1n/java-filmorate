@@ -13,6 +13,7 @@ import java.util.List;
 @Service
 public class GenreService {
     GenreStorage storage;
+
     public List<Genre> getAll() {
         return storage.getAll();
     }

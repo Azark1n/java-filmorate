@@ -13,6 +13,7 @@ import java.util.List;
 @Service
 public class MpaService {
     MpaStorage storage;
+
     public Mpa getById(int id) {
         return storage.getById(id);
     }
