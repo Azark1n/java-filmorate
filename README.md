@@ -6,15 +6,12 @@
 
 * Java 11
 * Spring Boot 2.7.0
+* jdbcTemplate
 * H2 2.1
 * Maven
 * Lombok
 * JUnit
 * RESTful API
-
-## API
-
-После запуска приложения Swagger документация будет доступна по адресу `http://localhost:8080/swagger-ui/index.html`
 
 ## Data base diagram
 
